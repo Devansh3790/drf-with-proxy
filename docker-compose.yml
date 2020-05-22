@@ -1,0 +1,29 @@
+ 
+version: '3'
+
+services: 
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-django
+    image: drf-with-proxy-backend
+    volumes:
+      - ./:/app
+    ports:
+      - 8000:8000
+    command: python manage.py runserver 0.0.0.0:8000
+
+  nginx:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile-nginx
+    image: drf-with-proxy--nginx
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx/etc/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/etc/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+      - "81:81"
+    command: ["nginx", "-g", "daemon off;"]
